@@ -7,7 +7,7 @@ namespace IssueTracker.Models {
 
         public string Text { get; set; }
 
-        public string IssueID { get; set; }
+        public int IssueID { get; set; }
 
         public string CreatorID { get; set; }
 
