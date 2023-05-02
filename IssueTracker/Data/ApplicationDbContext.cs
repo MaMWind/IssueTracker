@@ -8,5 +8,7 @@ namespace IssueTracker.Data {
             : base(options) {
         }
         public DbSet<IssueTracker.Models.Project>? Project { get; set; }
+        public DbSet<IssueTracker.Models.Issue>? Issues { get; set; }
+        public DbSet<IssueTracker.Models.Message>? Messages { get; set; }
     }
 }
