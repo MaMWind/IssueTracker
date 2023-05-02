@@ -8,18 +8,29 @@ namespace IssueTracker.Models {
 
         public string Description { get; set; }
 
-        public string Type{ get; set; }
+        public Type Type{ get; set; }
 
-        // TODO implement Fileupload and storage
-        public string Files { get; set; }
+        // Store the uploaded files directly onto the server and only store the path in the database.
+        public string Filepath { get; set; }
 
-        public string Status { get; set; }
+        public Status Status { get; set; }
 
         public string CreatorID { get; set; }
-
 
         public string AssigneeID { get; set; }
 
         public ICollection<Message> Messages { get; set; }
+    }
+
+    public enum Status {
+        Open,
+        Closed,
+        Rejected
+    }
+
+    public enum Type {
+        Defect,
+        Enhancement,
+        Task
     }
 }
