@@ -1,0 +1,31 @@
+﻿@model Issue
+
+<div class="card">
+    <div class="card-header">
+        <h2>Create new issue</h2>
+    </div>
+    <div class="card-body">
+        <form asp-controller="Issue" asp-action="CreateIssue" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input asp-for=Title type="text" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <input asp-for="Description" type="text" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Type</label>
+                <select asp-for="Type" type="text" class="form-control">
+                    <option value="Defect">Defect</option>
+                    <option value="Enhancement">Enhancement</option>
+                    <option value="Task">Task</option>
+                </select>
+            </div>
+
+            <input type="hidden" value="@Model.ProjectID" asp-for="ProjectID" />
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>

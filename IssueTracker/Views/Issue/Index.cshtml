@@ -1,0 +1,42 @@
+﻿@model IssueTracker.ViewModels.IssueViewModel
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    <div class="card">
+        <div class="card-body">
+            <a class="btn-primary btn" asp-controller="Issue" asp-action="Create" asp-route-projectID=@Model.ProjectID>Create new Issue</a>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Titel
+                        </th>
+                        <th>
+                            Typ
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var issue in Model._issues) {
+                        <tr>
+                            <td>
+                                @issue.Title
+                            </td>
+                            <td>
+                                @issue.Type
+                            </td>
+                            <td>
+                                @issue.Status
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+}

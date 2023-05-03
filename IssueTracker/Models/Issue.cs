@@ -11,13 +11,15 @@ namespace IssueTracker.Models {
         public Type Type{ get; set; }
 
         // Store the uploaded files directly onto the server and only store the path in the database.
-        public string Filepath { get; set; }
+        public string? Filepath { get; set; }
+
+        public int ProjectID { get; set; }
 
         public Status Status { get; set; }
 
         public string CreatorID { get; set; }
 
-        public string AssigneeID { get; set; }
+        public string? AssigneeID { get; set; }
 
         public ICollection<Message> Messages { get; set; }
     }
