@@ -1,0 +1,24 @@
+﻿@model IssueTracker.ViewModels.UserManagementViewModel
+
+<div class="card">
+    <div class="card-body">
+        <form>
+            <table class="table">
+                <tr>
+                    <th>User</th>
+                    <th>Roles</th>
+                </tr>
+                @foreach (var user in Model.Users) {
+                    <tr>
+                        <td> @user.UserName</td>
+                        <td>
+                            @foreach (var role in Model.Roles) {
+                                <input type="checkbox" name="@user.Id" value="@role.Id" >
+                            }
+                        </td>
+                    </tr>
+                }
+            </table>
+        </form>
+    </div>
+</div>
