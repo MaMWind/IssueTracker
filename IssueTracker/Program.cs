@@ -1,4 +1,6 @@
+using IssueTracker.Authorization;
 using IssueTracker.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

@@ -7,6 +7,7 @@ using IssueTracker.Models;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using IssueTracker.Authorization;
 
 namespace IssueTracker.Controllers {
     public class IssueController : Controller {
@@ -15,7 +16,7 @@ namespace IssueTracker.Controllers {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public IssueController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager) {
+        public IssueController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager, IAuthorizationService authorization) {
             _logger = logger;
             _context = context;
             _userManager = userManager;
@@ -36,42 +37,70 @@ namespace IssueTracker.Controllers {
             return View(issueModel);
         }
 
-        public IActionResult CreateIssue(Issue issueModel) {
-            issueModel.Status = Status.Open;
-            string id = _userManager.GetUserId(User);
-            issueModel.CreatorID = id;
-            _context.Issues.Add(issueModel);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index), new {projectID = issueModel.ProjectID}); 
+        public async Task<IActionResult> CreateIssue(Issue issueModel) {
+
+            if (User.IsInRole(AuthorizationConstants.SupportRole) || User.IsInRole(AuthorizationConstants.DeveloperRole) ||
+                User.IsInRole(AuthorizationConstants.AdminRole)) {
+                issueModel.Status = Status.Open;
+                string id = _userManager.GetUserId(User);
+                issueModel.CreatorID = id;
+                await _context.Issues.AddAsync(issueModel);
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index), new {projectID = issueModel.ProjectID}); 
+            }
+            return Forbid();
         }
 
-        public IActionResult Details(int id) {
-            Issue issue = _context.Issues.FirstOrDefault(x => x.IssueID == id);
-            IssueView issueView = IssueViewModel.CreateFromIssue(issue);
-            issueView.Messages = MessageViewFromMessage(_context.Messages.Where(x => x.IssueID == id).ToList());
-            issueView.Creator = _context.Users.FirstOrDefault(x => x.Id == issue.CreatorID);
-            issueView.Assignee = _context.Users.FirstOrDefault(x => x.Id == issue.AssigneeID);
-            if (issueView == null) {
-                return View("Error");
+        public async Task<IActionResult> Details(int id) {
+            if (User.IsInRole(AuthorizationConstants.SupportRole) || User.IsInRole(AuthorizationConstants.DeveloperRole) ||
+                User.IsInRole(AuthorizationConstants.AdminRole)) {
+                Issue issue = _context.Issues.FirstOrDefault(x => x.IssueID == id);
+                IssueView issueView = IssueViewModel.CreateFromIssue(issue);
+                issueView.Messages = MessageViewFromMessage(_context.Messages.Where(x => x.IssueID == id).ToList());
+                issueView.Creator = _context.Users.FirstOrDefault(x => x.Id == issue.CreatorID);
+                issueView.Assignee = _context.Users.FirstOrDefault(x => x.Id == issue.AssigneeID);
+                if (issueView == null) {
+                    return View("Error");
+                }
+                return View(issueView);
             }
-            return View(issueView);
+            return Forbid();
         }
 
         public IActionResult Delete(int id) {
-            Issue issue = _context.Issues.First(x => x.IssueID == id);
-            int projectId = issue.ProjectID;
-            _context.Issues.Remove(issue);
-            _context.Messages.RemoveRange(_context.Messages.Where(x => x.IssueID == id));
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index), new { projectID = projectId });
+            if (User.IsInRole(AuthorizationConstants.SupportRole) || User.IsInRole(AuthorizationConstants.DeveloperRole) ||
+                User.IsInRole(AuthorizationConstants.AdminRole)) {
+                Issue issue = _context.Issues.First(x => x.IssueID == id);
+                int projectId = issue.ProjectID;
+                _context.Issues.Remove(issue);
+                _context.Messages.RemoveRange(_context.Messages.Where(x => x.IssueID == id));
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index), new { projectID = projectId });
+            }
+            return Forbid();
         }
 
-        public IActionResult CreateMessage(Message message) {
-            Issue issue = _context.Issues.FirstOrDefault(x=> x.IssueID == message.IssueID);
-            issue.Messages.Add(message);
-            _context.Messages.Add(message);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Details), new {id = message.IssueID});
+        public IActionResult CreateMessage(string text, int issueId) {
+            if (User.IsInRole(AuthorizationConstants.SupportRole) || User.IsInRole(AuthorizationConstants.DeveloperRole) ||
+                User.IsInRole(AuthorizationConstants.AdminRole)) {
+                Message message = new Message();
+                message.Text = text;
+                message.IssueID = issueId;
+                message.CreatorID = _userManager.GetUserId(User);
+                message.CreateDate = DateTime.UtcNow;
+
+
+
+                Issue issue = _context.Issues.FirstOrDefault(x => x.IssueID == issueId);
+                if (issue.Messages == null) {
+                    issue.Messages = new List<Message>();
+                }
+                issue.Messages.Add(message);
+                _context.Messages.Add(message);
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Details), new { id = message.IssueID });
+            }
+            return Forbid();
         }
 
 
@@ -87,9 +116,13 @@ namespace IssueTracker.Controllers {
         }
 
         public IActionResult Assign(int id) {
-            _context.Issues.First(x => x.IssueID == id).AssigneeID = _userManager.GetUserId(User);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Details), new {id = id });
+            if (User.IsInRole(AuthorizationConstants.DeveloperRole) ||
+                User.IsInRole(AuthorizationConstants.AdminRole)) {
+                _context.Issues.First(x => x.IssueID == id).AssigneeID = _userManager.GetUserId(User);
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+            return Forbid();
         }
     }
 }

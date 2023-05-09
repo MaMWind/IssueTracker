@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using IssueTracker.Data;
 using IssueTracker.Models;
+using IssueTracker.Authorization;
 
 namespace IssueTracker.Controllers
 {
@@ -58,29 +59,33 @@ namespace IssueTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProjectID,Name,CreatorID")] Project project)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(project);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            if (User.IsInRole(AuthorizationConstants.AdminRole)) {
+                if (ModelState.IsValid)
+                {
+                    _context.Add(project);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(project);
             }
-            return View(project);
+            return Forbid();
         }
 
         // GET: Projects/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Project == null)
-            {
-                return NotFound();
-            }
+            if (User.IsInRole(AuthorizationConstants.AdminRole)) {
+                if (id == null || _context.Project == null) {
+                    return NotFound();
+                }
 
-            var project = await _context.Project.FindAsync(id);
-            if (project == null)
-            {
-                return NotFound();
+                var project = await _context.Project.FindAsync(id);
+                if (project == null) {
+                    return NotFound();
+                }
+                return View(project);
             }
-            return View(project);
+            return Forbid();
         }
 
         // POST: Projects/Edit/5
@@ -90,32 +95,29 @@ namespace IssueTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProjectID,Name,CreatorID")] Project project)
         {
-            if (id != project.ProjectID)
-            {
-                return NotFound();
-            }
+            if (User.IsInRole(AuthorizationConstants.AdminRole)) {
+                if (id != project.ProjectID) {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(project);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProjectExists(project.ProjectID))
-                    {
-                        return NotFound();
+                if (ModelState.IsValid) {
+                    try {
+                        _context.Update(project);
+                        await _context.SaveChangesAsync();
                     }
-                    else
-                    {
-                        throw;
+                    catch (DbUpdateConcurrencyException) {
+                        if (!ProjectExists(project.ProjectID)) {
+                            return NotFound();
+                        }
+                        else {
+                            throw;
+                        }
                     }
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+                return View(project);
             }
-            return View(project);
+            return Forbid();
         }
 
         // GET: Projects/Delete/5
@@ -141,18 +143,19 @@ namespace IssueTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Project == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Project'  is null.");
+            if (User.IsInRole(AuthorizationConstants.AdminRole)) {
+                if (_context.Project == null) {
+                    return Problem("Entity set 'ApplicationDbContext.Project'  is null.");
+                }
+                var project = await _context.Project.FindAsync(id);
+                if (project != null) {
+                    _context.Project.Remove(project);
+                }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            var project = await _context.Project.FindAsync(id);
-            if (project != null)
-            {
-                _context.Project.Remove(project);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Forbid();
         }
 
         private bool ProjectExists(int id)

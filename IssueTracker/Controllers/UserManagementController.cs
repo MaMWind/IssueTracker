@@ -1,4 +1,5 @@
-﻿using IssueTracker.Data;
+﻿using IssueTracker.Authorization;
+using IssueTracker.Data;
 using IssueTracker.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +17,15 @@ namespace IssueTracker.Controllers {
         }
 
         public IActionResult Index() {
-            UserManagementViewModel vm = new UserManagementViewModel();
-            vm.Users = _context.Users.ToList();
-            vm.Roles = _context.Roles.ToList();
-            vm.UserRoles = _context.UserRoles.ToList();
-            return View(vm);
+            var isAdmin = User.IsInRole(AuthorizationConstants.AdminRole);
+            if (isAdmin) {
+                UserManagementViewModel vm = new UserManagementViewModel();
+                vm.Users = _context.Users.ToList();
+                vm.Roles = _context.Roles.ToList();
+                vm.UserRoles = _context.UserRoles.ToList();
+                return View(vm);
+            }
+            return Forbid();
         }
     }
 }
