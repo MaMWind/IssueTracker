@@ -124,5 +124,15 @@ namespace IssueTracker.Controllers {
             }
             return Forbid();
         }
+
+        public IActionResult ChangeStatus(IssueView view) {
+            if (User.IsInRole(AuthorizationConstants.DeveloperRole) || 
+                    User.IsInRole(AuthorizationConstants.AdminRole)) {
+                _context.Issues.First(x=> x.IssueID == view.Id).Status = view.Status;
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Details), new { id = view.Id });
+            }
+            return Forbid();
+        }
     }
 }

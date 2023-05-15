@@ -2,23 +2,18 @@
 
 <div class="card">
     <div class="card-body">
-        <form>
+        <form asp-controller="UserManagement" asp-action="AssignRole">
             <table class="table">
                 <tr>
                     <th>User</th>
-                    <th>Roles</th>
                 </tr>
                 @foreach (var user in Model.Users) {
                     <tr>
-                        <td> @user.UserName</td>
-                        <td>
-                            @foreach (var role in Model.Roles) {
-                                <input type="checkbox" name="@user.Id" value="@role.Id" >
-                            }
-                        </td>
+                        <td><a asp-controller="UserManagement" asp-action="Details" asp-route-id="@user.Id">@user.UserName</a></td>
                     </tr>
                 }
             </table>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
 </div>

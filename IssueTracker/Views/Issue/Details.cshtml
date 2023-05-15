@@ -7,11 +7,19 @@
         </h2>
     </div>
     <div class="card-body">
-        <h4>Status: @Model.Status</h4>
+        <h4 class="d-inline">Status: </h4> <form asp-controller="Issue" asp-action="ChangeStatus" class="d-inline">
+            <select asp-for="Status">
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <input type="hidden" asp-for="Id" value="@Model.Id" />
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
         <h4>Type: @Model.Type</h4>
         <h4>Creator: @Model.Creator.UserName</h4>
         @if (Model.Assignee != null) {
-            <h4>Assignee: @Model.Assignee.UserName</h4>
+            <h4>Assignee: @Model.Assignee.UserName | <a asp-controller="Issue" asp-action="Assign" asp-route-id="@Model.Id" class="btn btn-primary">Assign</a></h4>
 
         } else {
             <h4>Assignee: <a asp-controller="Issue" asp-action="Assign" asp-route-id="@Model.Id" class="btn btn-primary">Assign</a></h4>
