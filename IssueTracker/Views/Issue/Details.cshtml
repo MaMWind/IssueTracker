@@ -38,19 +38,32 @@
                 </div>    
             }
         </div>
-        <div class="card">
-            <div class="card-header">
-                <h4>Create new Message</h4>
-            </div>
-            <div class="card-body">
-                <form asp-controller="Issue" asp-action="CreateMessage" method="post">
-                    <div class="form-group">
-                        <textarea type="text" name="text" class="form-control" style="min-width: 100%"></textarea>
-                    </div>
-                    <input type="hidden" name="issueId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h4>Upload File</h4>
+        </div>
+        <div class="card-body">
+            <form enctype="multipart/form-data" asp-controller="Issue" asp-action="UploadFile" method="post">
+                <label for="file">Upload File</label>
+                <input type="file" name="files" multiple/>
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-primary" value="Upload">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h4>Create new Message</h4>
+        </div>
+        <div class="card-body">
+            <form asp-controller="Issue" asp-action="CreateMessage" method="post">
+                <div class="form-group">
+                    <textarea type="text" name="text" class="form-control" style="min-width: 100%"></textarea>
+                </div>
+                <input type="hidden" name="issueId" value="@Model.Id" />
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
         </div>
     </div>
 </div>

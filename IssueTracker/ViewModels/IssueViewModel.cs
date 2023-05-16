@@ -1,6 +1,7 @@
 ﻿using IssueTracker.Models;
 using Microsoft.AspNetCore.Identity;
 
+
 namespace IssueTracker.ViewModels {
     public class IssueViewModel {
 
@@ -17,7 +18,7 @@ namespace IssueTracker.ViewModels {
         }
 
         public static IssueView CreateFromIssue(Issue issue) {
-            return new IssueView { Title = issue.Title, Type = issue.Type, Status = issue.Status, Description = issue.Description, FilePath = issue.Filepath, Id = issue.IssueID };
+            return new IssueView { Title = issue.Title, Type = issue.Type, Status = issue.Status, Description = issue.Description,  Id = issue.IssueID };
         }
     }
 
@@ -28,7 +29,8 @@ namespace IssueTracker.ViewModels {
         public Status Status { get; set; }
         public string Description { get; set; }
         public List<MessageView> Messages { get; set; }
-        public string? FilePath { get; set; }
+
+        public IFormFile File { get; set; }
 
         public IdentityUser Assignee { get; set; }
 

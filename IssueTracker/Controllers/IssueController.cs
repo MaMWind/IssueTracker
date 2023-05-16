@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using IssueTracker.Authorization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace IssueTracker.Controllers {
     public class IssueController : Controller {
@@ -133,6 +134,24 @@ namespace IssueTracker.Controllers {
                 return RedirectToAction(nameof(Details), new { id = view.Id });
             }
             return Forbid();
+        }
+
+        public async Task<IActionResult> UploadFile(List<IFormFile> files, int id) {
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), id.ToString()));
+            var size = files.Sum(f => f.Length);
+
+            var filePaths = new List<string>();
+            foreach (var formFile in files) {
+                if (formFile.Length > 0) {
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), id.ToString(), formFile.FileName);
+                    filePaths.Add(filePath);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create)) {
+                        await formFile.CopyToAsync(stream);
+                    }
+                }
+            }
+            return RedirectToAction(nameof(Details), new { id = id});
         }
     }
 }
