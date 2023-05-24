@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using IssueTracker.Authorization;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using IssueTracker.Services;
 
 namespace IssueTracker.Controllers {
     public class IssueController : Controller {
@@ -16,11 +18,15 @@ namespace IssueTracker.Controllers {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly EmailSender _emailSender;
 
-        public IssueController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager, IAuthorizationService authorization) {
+        public IssueController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager,
+            IAuthorizationService authorization, EmailSender emailSender, IConfiguration configuration) {
             _logger = logger;
             _context = context;
             _userManager = userManager;
+            _emailSender = emailSender;
+            _emailSender.config = configuration;
         }
 
         public async Task<IActionResult> Index(int projectID) {
@@ -81,7 +87,7 @@ namespace IssueTracker.Controllers {
             return Forbid();
         }
 
-        public IActionResult CreateMessage(string text, int issueId) {
+        public async Task<IActionResult> CreateMessage(string text, int issueId) {
             if (User.IsInRole(AuthorizationConstants.SupportRole) || User.IsInRole(AuthorizationConstants.DeveloperRole) ||
                 User.IsInRole(AuthorizationConstants.AdminRole)) {
                 Message message = new Message();
@@ -98,6 +104,11 @@ namespace IssueTracker.Controllers {
                 }
                 issue.Messages.Add(message);
                 _context.Messages.Add(message);
+
+                if (issue.AssigneeID != null) {
+                    var emailAssigne = _context.Users.Find(issue.AssigneeID).Email;
+                    await _emailSender.SendEmailAsync(emailAssigne, $"Neue Nachricht in Issue \"{issue.Title}\"", $"Eine neue Nachricht wurde dem Issue {issue.Title} hinzugefügt.");
+                }
                 _context.SaveChanges();
                 return RedirectToAction(nameof(Details), new { id = message.IssueID });
             }
@@ -116,7 +127,7 @@ namespace IssueTracker.Controllers {
             return messageViews;
         }
 
-        public IActionResult Assign(int id) {
+        public async Task<IActionResult> Assign(int id) {
             if (User.IsInRole(AuthorizationConstants.DeveloperRole) ||
                 User.IsInRole(AuthorizationConstants.AdminRole)) {
                 _context.Issues.First(x => x.IssueID == id).AssigneeID = _userManager.GetUserId(User);
@@ -151,7 +162,31 @@ namespace IssueTracker.Controllers {
                     }
                 }
             }
+
+            var issue = _context.Issues.First(x => x.IssueID == id);
+
+            if (issue.AssigneeID != null) {
+                var emailAssigne = _context.Users.Find(issue.AssigneeID).Email;
+                await _emailSender.SendEmailAsync(emailAssigne, $"Neue Datei in Issue \"{issue.Title}\"", $"Eine neue Datei wurde dem Issue {issue.Title} hinzugefügt.");
+            }
             return RedirectToAction(nameof(Details), new { id = id});
+        }
+
+        public ActionResult DownloadFile(string filePath) {
+            string fullName = Path.Combine(Directory.GetCurrentDirectory(),filePath);
+
+            byte[] fileBytes = GetFile(fullName);
+            return File(
+                fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, filePath);
+        }
+
+        byte[] GetFile(string s) {
+            System.IO.FileStream fileStream = System.IO.File.OpenRead(s);
+            byte[] data = new byte[fileStream.Length];
+            int br = fileStream.Read(data, 0, data.Length);
+            if (br != fileStream.Length)
+                throw new System.IO.IOException(s);
+            return data;
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿@model IssueTracker.ViewModels.IssueView
 
+@using System.IO;
+
 <div class="card">
     <div class="card-header">
         <h2>
@@ -39,6 +41,23 @@
             }
         </div>
     </div>
+    @{
+        var fileDirectory = System.IO.Path.Combine(Directory.GetCurrentDirectory(), Model.Id.ToString());
+        if (Directory.Exists(fileDirectory)) {
+            <div class="card">
+                <div class="card-header">
+                    <h4>Files</h4>
+                </div>
+                <div class="card-body">
+                @foreach(var file in Directory.GetFiles(fileDirectory)) {
+                    var filePath = System.IO.Path.Combine(fileDirectory, file);
+                    var fileName = @file.Split('\\').Last();
+                    <a class="d-inline" asp-controller="Issue" asp-action="DownloadFile" asp-route-filePath=@file>@fileName</a>
+                    }
+                </div>
+            </div>
+        }
+    }
     <div class="card">
         <div class="card-header">
             <h4>Upload File</h4>
