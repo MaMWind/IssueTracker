@@ -2,76 +2,93 @@
 
 @using System.IO;
 
-<div class="card">
+<div class="card ">
     <div class="card-header">
         <h2>
             @Model.Title
         </h2>
     </div>
     <div class="card-body">
-        <h4 class="d-inline">Status: </h4> <form asp-controller="Issue" asp-action="ChangeStatus" class="d-inline">
-            <select asp-for="Status">
-                <option value="Open">Open</option>
-                <option value="Closed">Closed</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-            <input type="hidden" asp-for="Id" value="@Model.Id" />
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-        <h4>Type: @Model.Type</h4>
-        <h4>Creator: @Model.Creator.UserName</h4>
-        @if (Model.Assignee != null) {
-            <h4>Assignee: @Model.Assignee.UserName | <a asp-controller="Issue" asp-action="Assign" asp-route-id="@Model.Id" class="btn btn-primary">Assign</a></h4>
+        <div class="container">
+            <div class="row align-items-start">
+                <h4 class="col">Status: </h4>
+                <form asp-controller="Issue" asp-action="ChangeStatus" class="col">
+                    <select asp-for="Status">
+                        <option value="Open">Open</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                    <input type="hidden" asp-for="Id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <div class="row align-items-start">
+                <h4 class="col">Type: </h4>
+                <h4 class="col">@Model.Type</h4>
+            </div>
+            <div class="row align-items-start">
+                <h4 class="col">Creator:</h4>
+                <h4 class="col">@Model.Creator.UserName</h4>
 
-        } else {
-            <h4>Assignee: <a asp-controller="Issue" asp-action="Assign" asp-route-id="@Model.Id" class="btn btn-primary">Assign</a></h4>
-        }
-        <h4>Description:</h4>
-        <p>@Model.Description</p>
-        <div>
-            @foreach (var message in Model.Messages) {
-                <div class="card">
-                    <div class="card-body">
-                        <p>@message.Text</p>
+            </div>
+            <div class="row align-items-start">
+                @if (Model.Assignee != null) {
+                    <h4 class="col">Assignee: </h4>
+
+                    <div class="col"><h4 class="col">@Model.Assignee.UserName |</h4>  <a asp-controller="Issue" asp-action="Assign" asp-route-id="@Model.Id" class="btn btn-primary c">Assign</a></div>
+
+                }
+                else {
+                    <div class="col"><h4 class="col">Assignee: <a asp-controller="Issue" asp-action="Assign" asp-route-id="@Model.Id" class="btn btn-primary c">Assign</a></h4></div>
+                }
+            </div>
+                <h4>Description:</h4>
+                <p>@Model.Description</p>
+            <div>
+                @foreach (var message in Model.Messages) {
+                    <div class="card">
+                        <div class="card-body">
+                            <p>@message.Text</p>
+                        </div>
+                        <div class="card-footer">
+                            <p>@message.Creator.UserName | @message.CreateDate</p>
+                        </div>
                     </div>
-                    <div class="card-footer">
-                        <p>@message.Creator.UserName | @message.CreateDate</p>
-                    </div>
-                </div>    
-            }
+                }
+            </div>
         </div>
     </div>
     @{
         var fileDirectory = System.IO.Path.Combine(Directory.GetCurrentDirectory(), Model.Id.ToString());
         if (Directory.Exists(fileDirectory)) {
-            <div class="card">
+            <div class="card m-3">
                 <div class="card-header">
                     <h4>Files</h4>
                 </div>
                 <div class="card-body">
-                @foreach(var file in Directory.GetFiles(fileDirectory)) {
-                    var filePath = System.IO.Path.Combine(fileDirectory, file);
-                    var fileName = @file.Split('\\').Last();
-                    <a class="d-inline" asp-controller="Issue" asp-action="DownloadFile" asp-route-filePath=@file>@fileName</a>
+                    @foreach (var file in Directory.GetFiles(fileDirectory)) {
+                        var filePath = System.IO.Path.Combine(fileDirectory, file);
+                        var fileName = @file.Split('\\').Last();
+                        <a class="d-inline" asp-controller="Issue" asp-action="DownloadFile" asp-route-filePath=@file>@fileName</a>
                     }
                 </div>
             </div>
         }
     }
-    <div class="card">
+    <div class="card m-3">
         <div class="card-header">
             <h4>Upload File</h4>
         </div>
         <div class="card-body">
             <form enctype="multipart/form-data" asp-controller="Issue" asp-action="UploadFile" method="post">
                 <label for="file">Upload File</label>
-                <input type="file" name="files" multiple/>
+                <input type="file" name="files" multiple />
                 <input type="hidden" name="id" value="@Model.Id" />
                 <button type="submit" class="btn btn-primary" value="Upload">Submit</button>
             </form>
         </div>
     </div>
-    <div class="card">
+    <div class="card m-3">
         <div class="card-header">
             <h4>Create new Message</h4>
         </div>
