@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Globalization;
 using System.Net;
 using System.Net.Mail;
 
@@ -7,6 +8,9 @@ namespace IssueTracker.Services {
 
         public IConfiguration? config;
 
+        public EmailSender(IConfiguration configuration) { 
+            config = configuration;
+        }
 
         public Task SendEmailAsync(string email, string subject, string message) {
             if (config != null && config["SendEmails"].Equals("true")) {
@@ -16,11 +20,14 @@ namespace IssueTracker.Services {
                     UseDefaultCredentials = false,
                     Credentials = new NetworkCredential(config["SmtpClient:Email"], config["SmtpClient:Password"])
                 };
-
-                return client.SendMailAsync(new MailMessage(from: config["SmtpClient:Email"],
+                var mailmsg = new MailMessage(from: config["SmtpClient:Email"],
                     to: email,
                     subject,
-                    message));
+                    message);
+
+                mailmsg.IsBodyHtml = true;
+
+                return client.SendMailAsync(mailmsg);
             } else {
                 return Task.CompletedTask;
             }

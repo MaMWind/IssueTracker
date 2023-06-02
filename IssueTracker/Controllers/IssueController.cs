@@ -18,15 +18,14 @@ namespace IssueTracker.Controllers {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly EmailSender _emailSender;
+        private readonly IEmailSender _emailSender;
 
         public IssueController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager,
-            IAuthorizationService authorization, EmailSender emailSender, IConfiguration configuration) {
+            IAuthorizationService authorization, IEmailSender emailSender, IConfiguration configuration) {
             _logger = logger;
             _context = context;
             _userManager = userManager;
             _emailSender = emailSender;
-            _emailSender.config = configuration;
         }
 
         public async Task<IActionResult> Index(int projectID) {
