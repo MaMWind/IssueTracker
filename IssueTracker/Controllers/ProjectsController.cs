@@ -8,16 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using IssueTracker.Data;
 using IssueTracker.Models;
 using IssueTracker.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace IssueTracker.Controllers
 {
     public class ProjectsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ProjectsController(ApplicationDbContext context)
+        public ProjectsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Projects
@@ -57,9 +60,10 @@ namespace IssueTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProjectID,Name,CreatorID")] Project project)
+        public async Task<IActionResult> Create([Bind("ProjectID,Name")] Project project)
         {
             if (User.IsInRole(AuthorizationConstants.AdminRole)) {
+                project.CreatorID = _userManager.GetUserId(User);
                 if (ModelState.IsValid)
                 {
                     _context.Add(project);

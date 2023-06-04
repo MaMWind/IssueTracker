@@ -20,8 +20,9 @@ namespace IssueTracker.Controllers {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IEmailSender _emailSender;
 
-        public IssueController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<IdentityUser> userManager,
-            IAuthorizationService authorization, IEmailSender emailSender, IConfiguration configuration) {
+        public IssueController(ILogger<HomeController> logger, 
+            ApplicationDbContext context, UserManager<IdentityUser> userManager,
+             IEmailSender emailSender) {
             _logger = logger;
             _context = context;
             _userManager = userManager;
