@@ -1,0 +1,16 @@
+﻿version: '3'
+services:
+    mssql-server:
+        image: mcr.microsoft.com/mssql/server:latest
+        environment: 
+            ACCEPT_EULA: "Y"
+            SA_PASSWORD: "Demo123Demo123"
+            MSSQL_PID: Express
+        ports:
+            - "1433:1433"
+    issuetracker:
+        build: .
+        environment:
+            DefaultConnection: "Server=host.docker.internal,1433;Initial Catalog=IssueTracker;User ID=SA;Password=Demo123Demo123"
+        ports: 
+            - "80:80"

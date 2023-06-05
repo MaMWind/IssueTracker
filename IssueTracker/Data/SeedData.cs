@@ -8,6 +8,7 @@ namespace IssueTracker.Data {
         public static async Task Initialize(IServiceProvider serviceProvider, string password = "$Demo123") {
             using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>())) {
+                context.Database.Migrate();
                 var adminUid = await EnsureUser(serviceProvider, "admin@test.de", password);
 
                 await EnsureRole(serviceProvider, adminUid, AuthorizationConstants.AdminRole);
