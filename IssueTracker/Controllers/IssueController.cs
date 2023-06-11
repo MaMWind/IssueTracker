@@ -19,14 +19,16 @@ namespace IssueTracker.Controllers {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
         public IssueController(ILogger<HomeController> logger, 
             ApplicationDbContext context, UserManager<IdentityUser> userManager,
-             IEmailSender emailSender) {
+             IEmailSender emailSender, IConfiguration configuration) {
             _logger = logger;
             _context = context;
             _userManager = userManager;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index(int projectID) {
@@ -105,7 +107,7 @@ namespace IssueTracker.Controllers {
                 issue.Messages.Add(message);
                 _context.Messages.Add(message);
 
-                if (issue.AssigneeID != null) {
+                if (issue.AssigneeID != null && _configuration["SendEmails"].Equals("true")) {
                     var emailAssigne = _context.Users.Find(issue.AssigneeID).Email;
                     await _emailSender.SendEmailAsync(emailAssigne, $"Neue Nachricht in Issue \"{issue.Title}\"", $"Eine neue Nachricht wurde dem Issue {issue.Title} hinzugefügt.");
                 }
@@ -165,7 +167,7 @@ namespace IssueTracker.Controllers {
 
             var issue = _context.Issues.First(x => x.IssueID == id);
 
-            if (issue.AssigneeID != null) {
+            if (issue.AssigneeID != null && _configuration["SendEmails"].Equals("true")) {
                 var emailAssigne = _context.Users.Find(issue.AssigneeID).Email;
                 await _emailSender.SendEmailAsync(emailAssigne, $"Neue Datei in Issue \"{issue.Title}\"", $"Eine neue Datei wurde dem Issue {issue.Title} hinzugefügt.");
             }

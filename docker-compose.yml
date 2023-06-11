@@ -13,4 +13,4 @@ services:
         environment:
             DefaultConnection: "Server=host.docker.internal,1433;Initial Catalog=IssueTracker;User ID=SA;Password=Demo123Demo123"
         ports: 
-            - "80:80"
+            - "8080:8080"

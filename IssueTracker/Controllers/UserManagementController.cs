@@ -10,12 +10,10 @@ namespace IssueTracker.Controllers {
 
         ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserManagementController(ApplicationDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager) {
+        public UserManagementController(ApplicationDbContext context, UserManager<IdentityUser> userManager) {
             _context = context;
             _userManager = userManager;
-            _roleManager = roleManager;
         }
 
         public IActionResult Index() {

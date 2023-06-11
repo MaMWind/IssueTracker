@@ -64,13 +64,9 @@ namespace IssueTracker.Controllers
         {
             if (User.IsInRole(AuthorizationConstants.AdminRole)) {
                 project.CreatorID = _userManager.GetUserId(User);
-                if (ModelState.IsValid)
-                {
-                    _context.Add(project);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(project);
+                _context.Add(project);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
             return Forbid();
         }
